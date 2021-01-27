@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 /**
@@ -15,6 +16,10 @@ namespace App\Controllers;
  */
 
 use CodeIgniter\Controller;
+use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\HTTP\IncomingRequest;
+use CodeIgniter\Validation\Exceptions\ValidationException;
+use Config\Services;
 
 class BaseController extends Controller
 {
@@ -43,4 +48,46 @@ class BaseController extends Controller
 		// $this->session = \Config\Services::session();
 	}
 
+	public function getResponse(
+		array $responseBody,
+		int $code = ResponseInterface::HTTP_OK
+	) {
+		return $this
+			->response
+			->setStatusCode($code)
+			->setJSON($responseBody);
+	}
+
+	public function getRequestInput(IncomingRequest $request){
+		$input = $request->getPost();
+		if (empty($input)) {
+			//convert request body to associative array
+			$input = json_decode($request->getBody(), true);
+		}
+		return $input;
+	}
+
+	public function validateRequest($input, array $rules, array $messages =[]){
+		$this->validator = Services::Validation()->setRules($rules);
+		// If you replace the $rules array with the name of the group
+		if (is_string($rules)) {
+			$validation = config('Validation');
+	
+			// If the rule wasn't found in the \Config\Validation, we
+			// should throw an exception so the developer can find it.
+			if (!isset($validation->$rules)) {
+				throw ValidationException::forRuleNotFound($rules);
+			}
+	
+			// If no error message is defined, use the error message in the Config\Validation file
+			if (!$messages) {
+				$errorName = $rules . '_errors';
+				// $messages = $validation->$errorName ?? [];
+				$messages = $validation->$errorName ? $validation->$errorName : [];
+			}
+	
+			$rules = $validation->$rules;
+		}
+		return $this->validator->setRules($rules, $messages)->run($input);
+	}
 }
