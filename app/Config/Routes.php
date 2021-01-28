@@ -34,6 +34,21 @@ $routes->get('/', 'Home::index');
 
 /**
  * --------------------------------------------------------------------
+ * Route API
+ * --------------------------------------------------------------------
+ */
+$routes->group('api', function($routes) 
+{
+	$routes->post('login', 'Api\Auth::login');
+	$routes->post('register', 'Api\Auth::register');
+});
+
+$routes->set404Override(function () {
+    echo view('welcome_message');
+});
+
+/**
+ * --------------------------------------------------------------------
  * Additional Routing
  * --------------------------------------------------------------------
  *

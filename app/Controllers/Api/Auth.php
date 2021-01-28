@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Api;
 
+use App\Controllers\BaseController;
 use App\Models\UserModel;
 use CodeIgniter\HTTP\Response;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -18,7 +19,7 @@ class Auth extends BaseController
     public function register()
     {
         $rules = [
-            'name' => 'required',
+            'username' => 'required',
             'email' => 'required|min_length[6]|max_length[50]|valid_email|is_unique[user.email]',
             'password' => 'required|min_length[8]|max_length[255]'
         ];
@@ -34,9 +35,6 @@ class Auth extends BaseController
 
         $userModel = new UserModel();
         $userModel->save($input);
-
-
-
 
         return $this
             ->getJWTForUser(
